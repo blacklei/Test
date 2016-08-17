@@ -1,0 +1,69 @@
+﻿//导出excel主体内容
+			private static function convertDGToHTMLTable(dg:AdvancedDataGrid):String { 
+						
+				//Set default values
+				var font:String = dg.getStyle('fontFamily');
+				var size:String = dg.getStyle('fontSize');
+				var str:String = '';
+				var colors:String = '';
+				var style:String = 'style="font-family:'+font+';font-size:'+size+'pt;"';
+				var hcolor:Array;
+				
+				if(dg.getStyle("headerColor") != undefined) {
+					hcolor = [dg.getStyle("headerColor")];
+				} else {
+					hcolor = dg.getStyle("headerColors");
+				}
+				
+				str += '<head><meta http-equiv="Content-Type" content="text/html;charset=utf-8"></head>';
+				str += '<table width="'+dg.width+'" border="1"><thead>';
+				str += '<caption>'+exportCityName+exportBeginT+'至'+exportEndT+'投诉点网格化（投诉点个数'+exportGridType+'）分析结果'+'</caption>';
+				str += '<tr>';
+				//for(var i:int = 1;i<dg.columns.length;i++) {//为了不导出isel，让i从1开始--elrei
+				//	if(dg.columns[i].headerText != undefined){
+				//		str += '<th>'+dg.columns[i].headerText+'</th>';
+				//	}else{
+				//		str += '<th>'+dg.columns[i].dataField+'</th>';
+				//	}
+				//}
+				//导出表格<th>
+				str += '<th>经度</th><th>纬度</th><th>地市</th><th>录音流水号</th><th>答复口径</th><th>网络类型</th><th>投诉时间</th><th>受理号码</th>'
+				str += '</tr></thead><tbody>';
+				for(var j:int =0;j<dg.dataProvider.length;j++)
+				{
+					if(dg.dataProvider.getItemAt(j).isSel){//增加一个checkbox是否被选中的判断--erlei
+						//str += '<tr>';
+						for(var k:int=12;k<dg.columns.length;k++){//为了不导出isel，让k从1开始--erlei
+							
+							if(dg.dataProvider.getItemAt(j) != undefined && dg.dataProvider.getItemAt(j) != null){
+								if(dg.columns[k].labelFunction != undefined){
+									str += '<td>'+dg.columns[k].labelFunction(dg.dataProvider.getItemAt(j),dg.columns[k].dataField)+'</td>';
+								}else{
+									//str += '<td>'+dg.dataProvider.getItemAt(j)[dg.columns[k].dataField]+'</td>';
+									//把投诉点详情转换为字符串
+									var list:String = dg.dataProvider.getItemAt(j)[dg.columns[k].dataField]; 
+									var exports:Array = list.split("]"); //以]作为分隔符将字符串切割 
+									for(var t:int=0;t<exports.length-1;t++){
+										var exportcell:String = exports[t];
+										var exportcells:Array = exportcell.split(","); //以，作为分隔符将字符串切割
+										str += '<tr>'
+										for(var h:int=0;h<exportcells.length;h++){
+											var index:int=exportcells[h].indexOf(':');//以：作为分隔符将字符串切割
+											var firstStr:String=exportcells[h].substring(0, index);
+											var secondStr:String=exportcells[h].substring(index + 1, exportcells[h].length);
+											//trace(secondStr);
+											str += '<td>'+secondStr+'</td>'
+										}
+										str += '</tr>'
+									}
+								}
+							}
+						}
+						//str += '</tr>';
+					}
+				}
+				
+				str+="</tbody></table>";
+				//Alert.show(str);
+				return str;
+			}
